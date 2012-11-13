@@ -38,7 +38,7 @@ class SolrQuery extends AbstractQuery {
 	/**
 	 * @return array
 	 */
-	public function getResult() {
+	public function execute() {
 		return $this->solrFacade->query($this);		
 	}
 	
@@ -61,6 +61,14 @@ class SolrQuery extends AbstractQuery {
 	 */
 	public function setUseAndOperator($strict) {
 		$this->useAndOperator = $strict;
+	}
+
+	public function enableSpellChecker() {
+		$this->solrQuery->addParam('spellcheck', 'true');
+		$this->solrQuery->addParam('spellcheck.build', 'true');
+		$this->solrQuery->addParam('qt', '/spell');
+		
+		return $this;
 	}
 	
 	/**
