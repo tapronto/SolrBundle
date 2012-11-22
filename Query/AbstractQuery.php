@@ -34,7 +34,7 @@ abstract class AbstractQuery {
 	/**
 	 * @return \SolrQuery
 	 */
-	public function getSolrQuery() {
+	public function prepare() {
 		$searchTerm = $this->getQueryString();
 		if (strlen($searchTerm) > 0) {
 			$this->solrQuery->setQuery($searchTerm);
