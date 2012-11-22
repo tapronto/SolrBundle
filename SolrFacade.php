@@ -10,6 +10,7 @@ use FS\SolrBundle\Query\AbstractQuery;
 use FS\SolrBundle\Repository\Repository;
 use Doctrine\ORM\Configuration;
 use FS\SolrBundle\Query\SolrQuery;
+use FS\SolrBundle\Query\SolrResponse;
 use FS\SolrBundle\Query\FindByIdentifierQuery;
 use Symfony\Component\HttpKernel\Log\LoggerInterface;
 use FS\SolrBundle\Doctrine\Mapper\Mapping\CommandFactory;
@@ -175,11 +176,18 @@ class SolrFacade {
 	 */
 	public function updateDocument($entity) {
 		$metaInformations = $this->metaInformationFactory->loadInformation($entity);
+
+		# Synchronization Filter
+		if($metaInformations->hasSynchronizationFilter())
+			if(!$entity->shouldBeIndexed())
+				return false;
+
 		$doc = $this->toDocument($metaInformations);
 		
 		$this->eventManager->handle(EventManager::UPDATE, new Event($this->solrClient, $metaInformations));
 		
 		$this->addDocumentToIndex($doc);
+		return true;
 	}	
 	
 	/**
@@ -187,6 +195,12 @@ class SolrFacade {
 	 */
 	public function addDocument($entity) {
 		$metaInformation = $this->metaInformationFactory->loadInformation($entity);
+
+		# Synchronization Filter
+		if($metaInformations->hasSynchronizationFilter())
+			if(!$entity->shouldBeIndexed())
+				return false;
+
 		$doc = $this->toDocument($metaInformation);
 		
 		$this->eventManager->handle(EventManager::INSERT, new Event($this->solrClient, $metaInformation));
@@ -205,6 +219,19 @@ class SolrFacade {
 		$doc = $this->entityMapper->toDocument($metaInformation);
 
 		return $doc;
+	}
+
+	public function toEntity($documents, $resultEntity) {
+		if(!is_array($documents)) {
+			$documents = array($documents);
+		}
+
+		$mappedEntities = array();
+        foreach ($documents as $document) {
+            $mappedEntities[] = $this->entityMapper->toEntity($document, $resultEntity);
+        }
+
+        return $mappedEntities;
 	}
 	
 	/**
@@ -225,31 +252,19 @@ class SolrFacade {
 	 * @return array found entities
 	 */
 	public function query(AbstractQuery $query) {
-		$solrQuery = $query->getSolrQuery();
+		$solrQuery = $query->prepare();
 		
 		try {
 			$response = $this->solrClient->query($solrQuery);
 		} catch (\Exception $e) {
 			return array();
 		}
-		
-		$response = $response->getResponse();
 
-		if (!array_key_exists('response', $response)) {
-			return array();	
-		}	
-			
-		if ($response['response']['docs'] == false) {
-			return array();	
-		}
+		$response = new SolrResponse($response->getResponse());
+		$response->setFacade($this);
+		$response->setResultEntity($query->getEntity());
 
-		$targetEntity = $query->getEntity();
-		$mappedEntities = array();
-		foreach ($response['response']['docs'] as $document) {
-			$mappedEntities[] = $this->entityMapper->toEntity($document, $targetEntity);
-		}
-		
-		return $mappedEntities;
+		return $response;
 	}
 	
 	/**
