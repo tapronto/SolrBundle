@@ -1,5 +1,5 @@
 {
-    "name": "floriansemm/solr-bundle",
+    "name": "tapronto/solr-bundle",
     "type": "symfony-bundle",
     "description": "Symfony2 Solr integration bundle",
     "keywords": ["search", "index", "symfony", "solr"],
