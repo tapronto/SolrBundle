@@ -14,10 +14,5 @@
             "FS\\SolrBundle": ""
         }
     },
-    "target-dir": "FS/SolrBundle",
-    "extra": {
-        "branch-alias": {
-            "dev-master": "master"
-        }
-    }
+    "target-dir": "FS/SolrBundle"
 }
