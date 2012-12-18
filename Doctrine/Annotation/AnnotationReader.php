@@ -30,7 +30,9 @@ class AnnotationReader {
 	private function getPropertiesByType($entity, $type) {
 		$reflectionClass = new \ReflectionClass($entity);
 		$properties = $reflectionClass->getProperties();
-		
+		$parentProperties = $reflectionClass->getParentClass()->getProperties();
+		$properties = array_merge($properties, $parentProperties);
+
 		$fields = array();
 		foreach ($properties as $property) {
 			$annotation = $this->reader->getPropertyAnnotation($property, $type);
@@ -148,7 +150,13 @@ class AnnotationReader {
 	private function getClassAnnotation($entity, $annotation) {
 		$reflectionClass = new \ReflectionClass($entity);
 	
-		return $this->reader->getClassAnnotation($reflectionClass, $annotation);
+		$result = $this->reader->getClassAnnotation($reflectionClass, $annotation);
+		if(!$result) {
+			$reflectionParent = $reflectionClass->getParentClass();
+			$result = $this->reader->getClassAnnotation($reflectionParent, $annotation);
+		}
+
+		return $result;
 	}
 }
 
