@@ -39,16 +39,16 @@ class EntityMapper {
 		if (null === $sourceTargetEntity) {
 			throw new \InvalidArgumentException('$sourceTargetEntity should not be null');
 		}
-		
+
 		$targetEntity = clone $sourceTargetEntity;
 		
 		$reflectionClass = new \ReflectionClass($targetEntity);
 		foreach ($document as $property => $value) {
 			try {
-				$classProperty = $reflectionClass->getProperty($this->removeFieldSuffix($property));
+				$classProperty = $reflectionClass->getProperty($this->toCamelCase($this->removeFieldSuffix($property)));
 			} catch (\ReflectionException $e) { 
 				try {
-					$classProperty = $reflectionClass->getProperty($this->toCamelCase($this->removeFieldSuffix($property)));
+					$classProperty = $reflectionClass->getParentClass()->getProperty($this->toCamelCase($this->removeFieldSuffix($property)));
 				} catch (\ReflectionException $e) {
 					continue;
 				}
