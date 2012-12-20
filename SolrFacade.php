@@ -197,7 +197,7 @@ class SolrFacade {
 		$metaInformation = $this->metaInformationFactory->loadInformation($entity);
 
 		# Synchronization Filter
-		if($metaInformations->hasSynchronizationFilter())
+		if($metaInformation->hasSynchronizationFilter())
 			if(!$entity->shouldBeIndexed())
 				return false;
 

@@ -59,7 +59,7 @@ class SolrQuery extends AbstractQuery {
 	/**
 	 * @param bool $strict
 	 */
-	public function setUseAndOperator($strict) {
+	public function useAndOperator($strict) {
 		$this->useAndOperator = $strict;
 	}
 
