@@ -47,7 +47,7 @@ class MetaInformationFactory {
 		if (!is_object($entity)) {
 			$entity = new $className;
 		}		
-		
+
 		if (!$this->annotationReader->hasDocumentDeclaration($entity)) {
 			throw new \RuntimeException(sprintf('no declaration for document found in entity %s', $className));
 		}

@@ -149,11 +149,13 @@ class AnnotationReader {
 	
 	private function getClassAnnotation($entity, $annotation) {
 		$reflectionClass = new \ReflectionClass($entity);
-	
+
 		$result = $this->reader->getClassAnnotation($reflectionClass, $annotation);
 		if(!$result) {
 			$reflectionParent = $reflectionClass->getParentClass();
-			$result = $this->reader->getClassAnnotation($reflectionParent, $annotation);
+
+			if($reflectionParent)
+				$result = $this->reader->getClassAnnotation($reflectionParent, $annotation);
 		}
 
 		return $result;
